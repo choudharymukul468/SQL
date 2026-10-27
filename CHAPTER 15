@@ -1,0 +1,133 @@
+# SQL Assignment: Date and Time Functions
+
+## 1. Display the Current Date and Time Using `NOW()`
+
+**SQL Query:**
+```sql
+SELECT NOW() AS CurrentDateTime;
+```
+
+**Explanation:**  
+The `NOW()` function returns the current date and time. The result column is named `CurrentDateTime`.
+
+**Sample Output:**
+
+| CurrentDateTime |
+|---|
+| 2026-10-27 15:30:00 |
+
+*Note: The output shown is an example; the actual result depends on the current system time.*
+
+## 2. Extract Year, Month, and Day from `Orders`
+
+**SQL Query:**
+```sql
+SELECT
+    order_date,
+    YEAR(order_date) AS order_year,
+    MONTH(order_date) AS order_month,
+    DAY(order_date) AS order_day
+FROM Orders;
+```
+
+**Explanation:**  
+- `YEAR()` extracts the year.
+- `MONTH()` extracts the month as a number from 1 to 12.
+- `DAY()` extracts the day of the month.
+
+**Sample Data — Orders**
+
+| order_date |
+|---|
+| 2026-05-15 |
+| 2026-08-22 |
+| 2026-10-27 |
+
+**Sample Output:**
+
+| order_date | order_year | order_month | order_day |
+|---|---:|---:|---:|
+| 2026-05-15 | 2026 | 5 | 15 |
+| 2026-08-22 | 2026 | 8 | 22 |
+| 2026-10-27 | 2026 | 10 | 27 |
+
+## 3. Calculate the Expected Pickup Date Using `DATE_SUB()`
+
+**SQL Query:**
+```sql
+SELECT
+    delivery_date,
+    DATE_SUB(delivery_date, INTERVAL 2 DAY) AS expected_pickup_date
+FROM Deliveries;
+```
+
+**Explanation:**  
+The `DATE_SUB()` function subtracts two days from `delivery_date` to calculate the expected pickup date.
+
+**Sample Data — Deliveries**
+
+| delivery_date |
+|---|
+| 2026-11-10 |
+| 2026-11-15 |
+| 2026-11-20 |
+
+**Sample Output:**
+
+| delivery_date | expected_pickup_date |
+|---|---|
+| 2026-11-10 | 2026-11-08 |
+| 2026-11-15 | 2026-11-13 |
+| 2026-11-20 | 2026-11-18 |
+
+## 4. Calculate Subscription Duration Using `DATEDIFF()`
+
+**SQL Query:**
+```sql
+SELECT
+    user_id,
+    start_date,
+    end_date,
+    DATEDIFF(end_date, start_date) AS total_days
+FROM Subscriptions;
+```
+
+**Explanation:**  
+The `DATEDIFF()` function returns the number of days between `end_date` and `start_date`.
+
+**Sample Data — Subscriptions**
+
+| user_id | start_date | end_date |
+|---:|---|---|
+| 101 | 2026-01-01 | 2026-01-31 |
+| 102 | 2026-03-10 | 2026-04-10 |
+| 103 | 2026-06-01 | 2026-06-15 |
+
+**Sample Output:**
+
+| user_id | start_date | end_date | total_days |
+|---:|---|---|---:|
+| 101 | 2026-01-01 | 2026-01-31 | 30 |
+| 102 | 2026-03-10 | 2026-04-10 | 31 |
+| 103 | 2026-06-01 | 2026-06-15 | 14 |
+
+## 5. Find Users Who Haven't Logged In for More Than 30 Days
+
+**SQL Query:**
+```sql
+SELECT
+    user_id,
+    last_login_date
+FROM AppLogins
+WHERE DATEDIFF(NOW(), last_login_date) > 30;
+```
+
+**Explanation:**  
+- `NOW()` returns the current date and time.
+- `DATEDIFF(NOW(), last_login_date)` calculates the number of whole days between the current date and the last login date.
+- `> 30` selects only users whose last login was more than 30 days ago.
+- The query returns only `user_id` and `last_login_date`, as required.
+
+## Conclusion
+
+This assignment demonstrates the use of MySQL date and time functions: `NOW()`, `YEAR()`, `MONTH()`, `DAY()`, `DATE_SUB()`, and `DATEDIFF()` for retrieving current date and time, extracting date parts, calculating dates, measuring durations, and identifying inactive users.
