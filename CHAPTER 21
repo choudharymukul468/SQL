@@ -1,0 +1,235 @@
+# ASSIGNMENT: SQL SERVER INTEGRATION WITH EXCEL USING POWER QUERY
+
+**Subject:** Database Management System (DBMS) / Data Analytics
+
+**Assignment Title:** Connecting SQL Server to Excel Using Power Query
+
+**Student Name:** __________________________
+
+**Roll Number:** ____________________________
+
+**Class / Semester:** ________________________
+
+**College Name:** ___________________________
+
+**Date of Submission:** _____________________
+
+## 1. Connect Excel to SQL Server and Load the Restaurants Table
+
+**Objective:** Import restaurant data from SQL Server into a new Excel worksheet using Power Query.
+
+**Steps:**
+
+1. Open Microsoft Excel.
+2. Select **Data → Get Data → From Database → From SQL Server Database**.
+3. Enter the SQL Server name and database name.
+4. Select the `Restaurants` table in the Navigator window.
+5. Click **Transform Data** to open Power Query Editor.
+6. Select **Close & Load To… → Table → New worksheet**.
+
+**Example SQL Query:**
+```sql
+SELECT name, cuisine, rating
+FROM dbo.Restaurants;
+```
+
+**Expected Output:**
+
+| name | cuisine | rating |
+|---|---|---:|
+| Spice Garden | South Indian | 4.5 |
+| Dragon Palace | Chinese | 4.3 |
+| Tasty Corner | North Indian | 3.8 |
+| Golden Wok | Chinese | 4.7 |
+
+*The records above are illustrative sample data.*
+
+**Result:** The restaurant data is imported into Excel as a table using Power Query.
+
+## 2. Create a Cuisine Parameter Using an Excel Cell
+
+**Objective:** Filter restaurants dynamically according to a cuisine type entered in Excel, such as `Chinese` or `South Indian`.
+
+### Step A: Create an input cell
+
+1. In a worksheet named `Control`, enter `Cuisine` in cell A1.
+2. Enter `Chinese` in cell B1.
+3. Select B1 and use **Formulas → Define Name** to name the cell `CuisineInput`.
+
+### Step B: Create a Power Query parameter
+
+1. Open **Data → Get Data → Launch Power Query Editor**.
+2. Select **Manage Parameters → New Parameter**.
+3. Name the parameter `pCuisine`.
+4. Set the data type to Text and the current value to `Chinese`.
+
+Power Query parameters are useful for controlling filters, but a parameter does not automatically read a worksheet cell. To make the filter respond to B1, import the named cell as a query and reference its value.
+
+### Step C: Read the Excel cell value
+
+Create a blank query and use this M code in the Advanced Editor:
+
+```powerquery
+let
+    Source = Excel.CurrentWorkbook(){[Name="CuisineInput"]}[Content],
+    CuisineValue = Text.From(Source{0}[Column1])
+in
+    CuisineValue
+```
+
+Name this query `CuisineValue`.
+
+### Step D: Filter the SQL Server data
+
+Use this M code in the query for the restaurant data:
+
+```powerquery
+let
+    Source = Sql.Database("YOUR_SERVER", "YOUR_DATABASE"),
+    Restaurants = Source{[Schema="dbo", Item="Restaurants"]}[Data],
+    FilteredRows = Table.SelectRows(
+        Restaurants,
+        each [cuisine] = CuisineValue
+    )
+in
+    FilteredRows
+```
+
+Replace `YOUR_SERVER` and `YOUR_DATABASE` with your actual connection details.
+
+**How it works:** When B1 contains `Chinese`, the query returns Chinese restaurants. Change B1 to `South Indian`, then refresh the query to retrieve South Indian restaurants.
+
+**Result:** Excel can filter restaurant records using a cuisine value entered in a worksheet cell.
+
+## 3. Enable Dynamic Data Refresh
+
+**Objective:** Refresh Excel data when new restaurant records are added to SQL Server.
+
+**Steps:**
+
+1. Select the imported restaurant table.
+2. Open **Data → Queries & Connections**.
+3. Right-click the relevant query and select **Properties**.
+4. Enable **Refresh data when opening the file** if required.
+5. Optionally configure a refresh interval.
+6. Click **Data → Refresh All** whenever you want to retrieve the latest records.
+
+**Example SQL Query:**
+```sql
+SELECT name, cuisine, rating
+FROM dbo.Restaurants;
+```
+
+The query retrieves the current records each time it runs.
+
+**Result:** Newly added SQL Server records appear in Excel after a successful refresh, provided the query includes those records and the connection has the required permissions.
+
+**Note:** Refresh is not necessarily instantaneous. Excel must refresh the query to retrieve new records. Automatic background or scheduled refresh availability depends on the Excel version and environment.
+
+## 4. Filter Restaurants with Ratings Above 4.0 and Create a Dashboard
+
+**Objective:** Display highly rated restaurants in an Excel dashboard with a table and bar chart.
+
+### Step A: Filter the data
+
+Use this SQL query:
+
+```sql
+SELECT name, cuisine, rating
+FROM dbo.Restaurants
+WHERE rating > 4.0;
+```
+
+Alternatively, in Power Query Editor:
+
+1. Select the `rating` column.
+2. Open the filter menu.
+3. Select **Number Filters → Greater Than**.
+4. Enter `4.0`.
+5. Select **Close & Load**.
+
+### Step B: Create the dashboard
+
+1. Add a worksheet named `Restaurant Dashboard`.
+2. Load the filtered restaurant results as an Excel table.
+3. Select the `name` and `rating` columns.
+4. Choose **Insert → Bar Chart**.
+5. Use restaurant names as categories and ratings as values.
+6. Add a title such as **Restaurants Rated Above 4.0**.
+
+**Example Output:**
+
+| name | cuisine | rating |
+|---|---|---:|
+| Spice Garden | South Indian | 4.5 |
+| Dragon Palace | Chinese | 4.3 |
+| Golden Wok | Chinese | 4.7 |
+
+**Result:** The dashboard displays only restaurants with ratings greater than 4.0 and compares their ratings visually.
+
+## 5. Create and Test a Parameterized Rating-Range Query
+
+**Objective:** Retrieve restaurants whose ratings fall between a minimum and maximum value, such as 3.5 and 5.0.
+
+### SQL Query
+
+The following SQL Server query uses parameters:
+
+```sql
+SELECT name, cuisine, rating
+FROM dbo.Restaurants
+WHERE rating BETWEEN @MinRating AND @MaxRating
+ORDER BY rating DESC;
+```
+
+`BETWEEN` includes both endpoints, so this query returns restaurants rated from 3.5 through 5.0, inclusive.
+
+### Power Query Implementation
+
+In Power Query, you can pass parameters to SQL Server using a native SQL query. For example:
+
+```powerquery
+let
+    Source = Sql.Database("YOUR_SERVER", "YOUR_DATABASE"),
+    Restaurants = Value.NativeQuery(
+        Source,
+        "SELECT name, cuisine, rating
+         FROM dbo.Restaurants
+         WHERE rating BETWEEN @MinRating AND @MaxRating
+         ORDER BY rating DESC",
+        [MinRating = 3.5, MaxRating = 5.0]
+    )
+in
+    Restaurants
+```
+
+Replace the server and database placeholders with your actual details. This example passes values as parameters instead of concatenating them into the SQL text.
+
+To make the range configurable, create Power Query parameters named `pMinRating` and `pMaxRating`, then replace the fixed values in the parameter record:
+
+```powerquery
+[MinRating = pMinRating, MaxRating = pMaxRating]
+```
+
+### Testing
+
+Test the query using these values:
+
+- Minimum rating: `3.5`
+- Maximum rating: `5.0`
+
+Then change the minimum rating to `4.0` and refresh the query.
+
+**Expected behavior:** The first test returns restaurants rated from 3.5 to 5.0. The second returns only restaurants rated from 4.0 to 5.0.
+
+**Result:** The parameterized query makes it possible to change the rating range without rewriting the SQL statement.
+
+## Conclusion
+
+This assignment demonstrates how to connect Microsoft Excel to SQL Server using Power Query, filter data with parameters, refresh imported records, and build a dashboard. Parameterized queries also make it easier to reuse SQL statements with different cuisine types or rating ranges.
+
+**Tools Used:**
+- Microsoft Excel
+- Power Query Editor
+- Microsoft SQL Server
+- SQL Server Management Studio (optional)
