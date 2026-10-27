@@ -1,0 +1,243 @@
+# SQL ASSIGNMENT
+## Topic: Ranking Functions in SQL
+
+**Subject:** Database Management System (DBMS)
+
+**Submitted By:** __________________________
+
+**Roll Number:** __________________________
+
+**Class / Semester:** __________________________
+
+**Submitted To:** __________________________
+
+**Date:** __________________________
+
+---
+
+## Objective
+
+To understand and implement SQL ranking functions such as `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()` to rank orders, songs, movies, and influencers within groups.
+
+---
+
+## Question 1: Assign a Sequential Number to Each Order Per User
+
+### Sample Table: Orders
+
+| order_id | user_id | order_date | total_amount |
+|---:|---:|---|---:|
+| 101 | 1 | 2026-10-10 | 500.00 |
+| 102 | 1 | 2026-10-15 | 700.00 |
+| 103 | 1 | 2026-10-12 | 300.00 |
+| 104 | 2 | 2026-10-08 | 450.00 |
+| 105 | 2 | 2026-10-18 | 900.00 |
+| 106 | 2 | 2026-10-11 | 600.00 |
+
+### SQL Query
+
+```sql
+SELECT
+    order_id,
+    user_id,
+    order_date,
+    total_amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY user_id
+        ORDER BY order_date DESC, order_id DESC
+    ) AS row_num
+FROM Orders
+ORDER BY user_id, row_num;
+```
+
+### Result Output
+
+| order_id | user_id | order_date | total_amount | row_num |
+|---:|---:|---|---:|---:|
+| 102 | 1 | 2026-10-15 | 700.00 | 1 |
+| 103 | 1 | 2026-10-12 | 300.00 | 2 |
+| 101 | 1 | 2026-10-10 | 500.00 | 3 |
+| 105 | 2 | 2026-10-18 | 900.00 | 1 |
+| 106 | 2 | 2026-10-11 | 600.00 | 2 |
+| 104 | 2 | 2026-10-08 | 450.00 | 3 |
+
+**Explanation:** `ROW_NUMBER()` assigns a unique sequential number to each order within each user. `PARTITION BY user_id` restarts numbering for every user, while `ORDER BY order_date DESC` places the newest order first. `order_id DESC` breaks ties when dates are equal.
+
+---
+
+## Question 2: Rank Songs by Streams Within Each Artist
+
+### Sample Table: Songs
+
+| song_id | artist | streams |
+|---:|---|---:|
+| 1 | Arijit Singh | 900000 |
+| 2 | Arijit Singh | 750000 |
+| 3 | Arijit Singh | 750000 |
+| 4 | Taylor Swift | 1200000 |
+| 5 | Taylor Swift | 950000 |
+| 6 | Taylor Swift | 800000 |
+
+### SQL Query
+
+```sql
+SELECT
+    song_id,
+    artist,
+    streams,
+    RANK() OVER (
+        PARTITION BY artist
+        ORDER BY streams DESC
+    ) AS song_rank
+FROM Songs
+ORDER BY artist, song_rank, song_id;
+```
+
+### Result Output
+
+| song_id | artist | streams | song_rank |
+|---:|---|---:|---:|
+| 1 | Arijit Singh | 900000 | 1 |
+| 2 | Arijit Singh | 750000 | 2 |
+| 3 | Arijit Singh | 750000 | 2 |
+| 4 | Taylor Swift | 1200000 | 1 |
+| 5 | Taylor Swift | 950000 | 2 |
+| 6 | Taylor Swift | 800000 | 3 |
+
+**Explanation:** `RANK()` assigns ranks according to stream counts within each artist. Songs with equal stream counts receive the same rank. The next rank is skipped after a tie, so the two Arijit Singh songs with 750,000 streams both receive rank 2.
+
+---
+
+## Question 3: Rank Movies Within Each Genre by Rating
+
+### Sample Table: Movies
+
+| movie_id | genre | rating |
+|---:|---|---:|
+| 1 | Action | 8.5 |
+| 2 | Action | 9.0 |
+| 3 | Action | 8.5 |
+| 4 | Comedy | 7.5 |
+| 5 | Comedy | 8.0 |
+| 6 | Comedy | 7.0 |
+
+### SQL Query
+
+```sql
+SELECT
+    movie_id,
+    genre,
+    rating,
+    DENSE_RANK() OVER (
+        PARTITION BY genre
+        ORDER BY rating DESC
+    ) AS movie_rank
+FROM Movies
+ORDER BY genre, movie_rank, movie_id;
+```
+
+### Result Output
+
+| movie_id | genre | rating | movie_rank |
+|---:|---|---:|---:|
+| 2 | Action | 9.0 | 1 |
+| 1 | Action | 8.5 | 2 |
+| 3 | Action | 8.5 | 2 |
+| 5 | Comedy | 8.0 | 1 |
+| 4 | Comedy | 7.5 | 2 |
+| 6 | Comedy | 7.0 | 3 |
+
+**Explanation:** `DENSE_RANK()` ranks movies separately within each genre, with the highest rating receiving rank 1. Tied ratings receive the same rank, but no rank numbers are skipped.
+
+---
+
+## Question 4: Display the Top 3 Influencers Per Platform
+
+### Sample Table: Influencers
+
+| id | platform | followers |
+|---:|---|---:|
+| 1 | Instagram | 900000 |
+| 2 | Instagram | 750000 |
+| 3 | Instagram | 600000 |
+| 4 | Instagram | 500000 |
+| 5 | YouTube | 1200000 |
+| 6 | YouTube | 950000 |
+| 7 | YouTube | 800000 |
+| 8 | YouTube | 650000 |
+| 9 | TikTok | 700000 |
+| 10 | TikTok | 550000 |
+| 11 | TikTok | 400000 |
+| 12 | TikTok | 300000 |
+
+### SQL Query
+
+```sql
+WITH RankedInfluencers AS (
+    SELECT
+        id,
+        platform,
+        followers,
+        ROW_NUMBER() OVER (
+            PARTITION BY platform
+            ORDER BY followers DESC, id ASC
+        ) AS row_num
+    FROM Influencers
+)
+SELECT
+    id,
+    platform,
+    followers,
+    row_num
+FROM RankedInfluencers
+WHERE row_num <= 3
+ORDER BY platform, row_num;
+```
+
+### Result Output
+
+| id | platform | followers | row_num |
+|---:|---|---:|---:|
+| 1 | Instagram | 900000 | 1 |
+| 2 | Instagram | 750000 | 2 |
+| 3 | Instagram | 600000 | 3 |
+| 9 | TikTok | 700000 | 1 |
+| 10 | TikTok | 550000 | 2 |
+| 11 | TikTok | 400000 | 3 |
+| 5 | YouTube | 1200000 | 1 |
+| 6 | YouTube | 950000 | 2 |
+| 7 | YouTube | 800000 | 3 |
+
+**Explanation:** The CTE `RankedInfluencers` assigns a row number to influencers separately within each platform. The main query filters the result to include only rows numbered 1, 2, and 3, giving the top three influencers per platform. The `id` column breaks ties in follower counts.
+
+---
+
+## Database Compatibility Notes
+
+These ranking queries are supported by modern versions of the following database systems:
+
+| Database | Compatibility |
+|---|---|
+| MySQL 8.0+ | Supports `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, and CTEs. |
+| PostgreSQL | Supports all functions used in this assignment. |
+| SQL Server | Supports all functions used in this assignment. |
+| Oracle Database | Supports all functions used in this assignment. |
+| SQLite 3.25.0+ | Supports the ranking window functions; CTE support is also available. |
+
+**Important points:**
+
+1. `ROW_NUMBER()` gives every row a unique sequential number, even when ranking values tie.
+2. `RANK()` gives tied rows the same rank and skips the following rank numbers.
+3. `DENSE_RANK()` gives tied rows the same rank without skipping rank numbers.
+4. `PARTITION BY` restarts the ranking for each group, such as each user, artist, genre, or platform.
+5. For consistent results when values tie, add a secondary column such as `order_id` or `id` to the `ORDER BY` clause.
+
+---
+
+## Conclusion
+
+In this assignment, we learned how to use SQL ranking functions to number orders, rank songs by streams, rank movies by ratings, and select the top three influencers per platform.
+
+`ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()` are useful for organizing data, comparing records, and identifying top-performing items within groups.
+
+**End of Assignment**
