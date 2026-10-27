@@ -1,0 +1,76 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** Retrieving Unique Records and Sorting Data in SQL
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Find Unique Payment Methods
+
+**Objective:** To display all unique payment methods used in the `orders` table of a food delivery application.
+
+**SQL Query:**
+
+```sql
+SELECT DISTINCT payment_method
+FROM orders;
+```
+
+**Explanation:** The `DISTINCT` keyword removes duplicate values and displays each payment method only once.
+
+**Result:** Displays the unique payment methods used in orders.
+
+## Task 2: Display Unique Cities in Alphabetical Order
+
+**Objective:** To list all cities where users have registered, without duplicates, sorted alphabetically from A to Z.
+
+**SQL Query:**
+
+```sql
+SELECT DISTINCT city
+FROM users
+ORDER BY city ASC;
+```
+
+**Explanation:** The `DISTINCT` keyword eliminates duplicate cities. The `ORDER BY` clause sorts the results, and `ASC` specifies ascending alphabetical order.
+
+**Result:** Displays each registered city once in alphabetical order.
+
+## Task 3: Retrieve the Five Most Recent Movie Bookings
+
+**Objective:** To display the five most recent bookings from the `bookings` table.
+
+**SQL Query:**
+
+```sql
+SELECT *
+FROM bookings
+ORDER BY booking_date DESC
+LIMIT 5;
+```
+
+**Explanation:** The `ORDER BY booking_date DESC` clause sorts bookings from newest to oldest. The `LIMIT 5` clause returns only five records.
+
+**Result:** Displays the five most recent movie bookings.
+
+## Task 4: Retrieve the Top 10 Best-Selling Products
+
+**Objective:** To display the names and sales counts of the ten products with the highest `sold_count` in the `products` table.
+
+**SQL Query:**
+
+```sql
+SELECT name, sold_count
+FROM products
+ORDER BY sold_count DESC
+LIMIT 10;
+```
+
+**Explanation:** The query selects only the `name` and `sold_count` columns. The `ORDER BY sold_count DESC` clause sorts products from highest to lowest sales, while `LIMIT 10` restricts the output to ten products.
+
+**Result:** Displays the ten best-selling products in descending order of sales.
+
+## Conclusion
+
+In this assignment, I learned how to use the `DISTINCT` keyword to eliminate duplicate records, `ORDER BY` to sort results, and `LIMIT` to restrict the number of returned rows. These SQL features help retrieve organized and relevant information from databases efficiently.
+
