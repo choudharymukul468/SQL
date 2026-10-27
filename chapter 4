@@ -1,0 +1,75 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** SQL Operators — LIKE, BETWEEN, and IN
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Find Restaurants Whose Names End with 'Cafe'
+
+**Objective:** To find restaurants whose names end with the word `Cafe` using the `LIKE` operator.
+
+**SQL Query:**
+
+```sql
+SELECT *
+FROM Restaurants
+WHERE name LIKE '%Cafe';
+```
+
+**Explanation:** The `%` wildcard matches any sequence of characters before `Cafe`. The restaurant name must end with `Cafe`.
+
+**Result:** Displays all restaurants whose names end with `Cafe`.
+
+## Task 2: Find Products Priced Between ₹500 and ₹1,500
+
+**Objective:** To display products whose prices are between 500 and 1500 rupees using the `BETWEEN` operator.
+
+**SQL Query:**
+
+```sql
+SELECT *
+FROM Products
+WHERE price BETWEEN 500 AND 1500;
+```
+
+**Explanation:** The `BETWEEN` operator selects prices within the specified range, including both 500 and 1500.
+
+**Result:** Displays all products priced from ₹500 to ₹1,500, inclusive.
+
+## Task 3: Find Users from Specific Cities
+
+**Objective:** To display users who belong to Ahmedabad, Surat, or Vadodara using the `IN` operator.
+
+**SQL Query:**
+
+```sql
+SELECT *
+FROM Users
+WHERE city IN ('Ahmedabad', 'Surat', 'Vadodara');
+```
+
+**Explanation:** The `IN` operator checks whether the city matches any of the three specified values.
+
+**Result:** Displays users from Ahmedabad, Surat, and Vadodara.
+
+## Task 4: Find Songs Whose Artist Names Contain 'ar'
+
+**Objective:** To find songs where the artist's name contains the letter sequence `ar` anywhere in the name.
+
+**SQL Query:**
+
+```sql
+SELECT song_name, artist_name
+FROM Songs
+WHERE artist_name LIKE '%ar%';
+```
+
+**Explanation:** The `%` wildcard on both sides of `ar` allows any characters before or after the sequence. In MySQL, whether matching is case-sensitive depends on the column's collation.
+
+**Result:** Displays song names and artist names where the artist's name contains `ar`.
+
+## Conclusion
+
+In this assignment, I learned how to use the SQL `LIKE`, `BETWEEN`, and `IN` operators to filter database records. The `LIKE` operator matches text patterns, `BETWEEN` selects values within a range, and `IN` checks for matches against multiple values.
+
