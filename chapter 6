@@ -1,0 +1,103 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** SQL Aggregate Functions — SUM(), COUNT(), AVG(), ROUND(), MIN(), MAX(), and GROUP BY
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Calculate Total Amount Spent on Food Orders
+
+**Objective:** To calculate the total amount spent on food orders using the `SUM()` function.
+
+**SQL Query:**
+
+```sql
+SELECT SUM(amount) AS total_amount_spent
+FROM food_orders;
+```
+
+**Explanation:** The `SUM()` function adds all values in the `amount` column and returns the total spending across all orders.
+
+**Result:** Displays the total amount spent on food orders by all users.
+
+## Task 2: Count Songs Added to Playlists
+
+**Objective:** To count the number of songs in the `spotify_playlists` table using the `COUNT()` function.
+
+**SQL Query:**
+
+```sql
+SELECT COUNT(song_id) AS total_songs
+FROM spotify_playlists;
+```
+
+**Explanation:** The `COUNT()` function counts the non-NULL values in the `song_id` column.
+
+**Result:** Displays the total number of song entries across all users' playlists.
+
+**Note:** To count songs for a particular user, add a condition such as `WHERE user_id = 101`, replacing `101` with the desired user ID.
+
+## Task 3: Calculate Average Movie Rating
+
+**Objective:** To calculate the average movie rating and round the result to one decimal place.
+
+**SQL Query:**
+
+```sql
+SELECT ROUND(AVG(rating), 1) AS average_rating
+FROM bookmyshow_reviews;
+```
+
+**Explanation:** The `AVG()` function calculates the average of all non-NULL ratings. The `ROUND()` function rounds the result to one decimal place.
+
+**Result:** Displays the average movie rating rounded to one decimal place.
+
+## Task 4: Find Minimum and Maximum Transaction Amounts
+
+**Objective:** To find the smallest and largest transaction amounts in the `paytm_transactions` table.
+
+**SQL Query:**
+
+```sql
+SELECT
+    MIN(amount) AS minimum_transaction,
+    MAX(amount) AS maximum_transaction
+FROM paytm_transactions;
+```
+
+**Explanation:** The `MIN()` function returns the smallest transaction amount, while the `MAX()` function returns the largest transaction amount.
+
+**Result:** Displays the minimum and maximum transaction values across all users.
+
+**Note:** To find these values for a particular user, add a `WHERE user_id = 101` condition before the end of the query.
+
+## Task 5: Calculate Order Statistics for Each User
+
+**Objective:** To calculate the total number of orders, average order value, and highest order value for each user using `GROUP BY`.
+
+**SQL Query:**
+
+```sql
+SELECT
+    user_id,
+    COUNT(order_id) AS total_orders,
+    ROUND(AVG(total_price), 2) AS average_order_value,
+    MAX(total_price) AS highest_order_value
+FROM myntra_orders
+GROUP BY user_id;
+```
+
+**Explanation:**
+
+- `COUNT(order_id)` counts the orders for each user.
+- `AVG(total_price)` calculates the average order value.
+- `ROUND(..., 2)` rounds the average to two decimal places.
+- `MAX(total_price)` finds the highest order value for each user.
+- `GROUP BY user_id` groups the records by user so that each user gets a separate result row.
+
+**Result:** Displays each user's ID, total number of orders, average order value, and highest order value.
+
+## Conclusion
+
+In this assignment, I learned how to use SQL aggregate functions to summarize data. The `SUM()` function calculates totals, `COUNT()` counts records, `AVG()` calculates averages, `ROUND()` formats decimal values, and `MIN()` and `MAX()` find the smallest and largest values. I also learned how to use `GROUP BY` to calculate statistics separately for each user.
+
