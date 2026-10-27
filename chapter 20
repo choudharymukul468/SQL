@@ -1,0 +1,188 @@
+# ASSIGNMENT
+
+**Subject:** Database Management System (DBMS) / SQL
+
+**Assignment Title:** IPL Match Data Analysis Using SQL, Excel, Power BI, and Python
+
+## Student Details
+
+- Student Name: __________________________
+- Roll Number: ____________________________
+- Class / Semester: ________________________
+- College Name: ___________________________
+- Faculty Name: ____________________________
+- Date of Submission: _____________________
+
+## 1. Import IPL Match Data into SQL
+
+**Objective:** Download a sample IPL matches CSV file and import it into a MySQL table named `ipl_matches`.
+
+**Dataset:** Download an IPL match dataset from [Kaggle IPL match datasets](https://www.kaggle.com/search?q=IPL+matches+CSV).
+
+**Steps:**
+1. Download the matches CSV file.
+2. Open MySQL Workbench and create a database.
+3. Use the Table Data Import Wizard to import the CSV.
+4. Name the table `ipl_matches`.
+
+**SQL Query:**
+```sql
+CREATE DATABASE ipl_analysis;
+USE ipl_analysis;
+
+SELECT COUNT(*) AS total_matches
+FROM ipl_matches;
+```
+
+**Result:** The query displays the total number of matches imported into the table.
+
+## 2. Select Mumbai Indians Matches and Export to CSV
+
+**Objective:** Retrieve all matches in which Mumbai Indians played and export the results as `mi_matches.csv`.
+
+**SQL Query:**
+```sql
+SELECT *
+FROM ipl_matches
+WHERE team1 = 'Mumbai Indians'
+   OR team2 = 'Mumbai Indians';
+```
+
+**Steps to export:**
+1. Execute the query in MySQL Workbench.
+2. Right-click the result grid or use the result export option.
+3. Select CSV format.
+4. Save the file as `mi_matches.csv`.
+
+**Result:** The CSV file contains matches in which Mumbai Indians played, regardless of the result.
+
+## 3. Connect Excel and Calculate Matches Played by Each Team
+
+**Objective:** Import the `ipl_matches` table into Microsoft Excel and calculate each team's total match appearances.
+
+**Steps:**
+1. Open Microsoft Excel.
+2. Select **Data → Get Data → From Database → From MySQL Database**.
+3. Enter the database connection details and select `ipl_matches`.
+4. Load the data into Excel.
+
+The following SQL query calculates the total matches played by each team:
+
+```sql
+SELECT team, SUM(matches_played) AS total_matches
+FROM (
+    SELECT team1 AS team, COUNT(*) AS matches_played
+    FROM ipl_matches
+    GROUP BY team1
+
+    UNION ALL
+
+    SELECT team2 AS team, COUNT(*) AS matches_played
+    FROM ipl_matches
+    GROUP BY team2
+) AS team_counts
+GROUP BY team
+ORDER BY total_matches DESC;
+```
+
+**Result:** The query returns one row per team, showing its total appearances as either `team1` or `team2`. Import this result into Excel to create a table or chart.
+
+## 4. Connect Power BI and Create a Team Wins Chart
+
+**Objective:** Visualize the number of wins recorded by each team.
+
+**Steps:**
+1. Open Power BI Desktop.
+2. Select **Get Data → MySQL Database**.
+3. Enter the server and database details.
+4. Import the `ipl_matches` table.
+5. Create a clustered bar chart.
+6. Put `winner` on the category axis and count the winning-team records on the values axis.
+
+Alternatively, calculate wins in SQL:
+
+```sql
+SELECT
+    winner AS team,
+    COUNT(*) AS total_wins
+FROM ipl_matches
+WHERE winner IS NOT NULL
+  AND winner <> ''
+GROUP BY winner
+ORDER BY total_wins DESC;
+```
+
+**Result:** The chart displays the total wins for each team in the imported dataset. Matches with no recorded winner are excluded.
+
+## 5. Use Python to Create the `mi_wins` Table
+
+**Objective:** Read `mi_matches.csv`, filter matches won by Mumbai Indians, and insert the matching records into a new SQL table named `mi_wins`.
+
+**Install the required libraries:**
+```bash
+pip install pandas sqlalchemy pymysql
+```
+
+**Python Code:**
+```python
+import pandas as pd
+from sqlalchemy import create_engine
+
+# Read the CSV file
+df = pd.read_csv("mi_matches.csv")
+
+# Filter matches won by Mumbai Indians
+mi_wins = df[
+    df["winner"].astype("string").str.strip()
+    == "Mumbai Indians"
+].copy()
+
+# Connect to the MySQL database
+engine = create_engine(
+    "mysql+pymysql://YOUR_USERNAME:YOUR_PASSWORD@localhost/ipl_analysis"
+)
+
+# Insert the filtered records into a new SQL table
+mi_wins.to_sql(
+    name="mi_wins",
+    con=engine,
+    if_exists="replace",
+    index=False
+)
+
+print("Total Mumbai Indians wins:", len(mi_wins))
+print("Data inserted successfully into mi_wins.")
+
+engine.dispose()
+```
+
+**Instructions:**
+- Replace `YOUR_USERNAME` and `YOUR_PASSWORD` with your MySQL credentials.
+- Ensure `mi_matches.csv` is in the Python script's working directory.
+- Confirm that the CSV contains a column named `winner`.
+- The `replace` option recreates the table each time the script runs.
+
+**Verify the table in SQL:**
+```sql
+SELECT COUNT(*) AS total_mi_wins
+FROM mi_wins;
+
+SELECT *
+FROM mi_wins;
+```
+
+**Result:** The `mi_wins` table contains the Mumbai Indians matches they won.
+
+## Conclusion
+
+This assignment demonstrates how to integrate SQL, Microsoft Excel, Power BI, and Python for sports data analysis. IPL match data is imported into SQL, filtered records are exported to CSV, team appearances are summarized in Excel, team wins are visualized in Power BI, and Python is used to filter and store Mumbai Indians victories in a separate SQL table.
+
+## Tools and Technologies Used
+
+- MySQL Workbench
+- Microsoft Excel
+- Power BI Desktop
+- Python
+- pandas
+- SQLAlchemy
+- PyMySQL
