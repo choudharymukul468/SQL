@@ -1,0 +1,67 @@
+1. Restaurants with a rating higher than the average rating
+SELECT name, rating
+FROM Restaurants
+WHERE rating > (
+    SELECT AVG(rating)
+    FROM Restaurants
+);
+
+Explanation: The subquery calculates the average rating of all restaurants. The main query displays only restaurants whose ratings are higher than that average.
+2. Products with the average price of their category
+
+
+SELECT
+    name,
+    price,
+    category,
+    (
+        SELECT AVG(p2.price)
+        FROM Products p2
+        WHERE p2.category = p1.category
+    ) AS average_category_price
+FROM Products p1;
+
+Explanation: The scalar subquery calculates the average price for the category of each product. The result appears as an additional column named average_category_price.
+3. Users who created more playlists than the average number per userExplanation: The scalar subquery calculates the average price for the category of each product. The result appears as an additional column named average_category_price.
+
+SELECT u.username, pc.playlist_count
+FROM Users u
+JOIN (
+    SELECT user_id, COUNT(*) AS playlist_count
+    FROM Playlists
+    GROUP BY user_id
+) pc
+    ON u.user_id = pc.user_id
+WHERE pc.playlist_count > (
+    SELECT AVG(user_playlist_count)
+    FROM (
+        SELECT COUNT(*) AS user_playlist_count
+        FROM Playlists
+        GROUP BY user_id
+    ) AS playlist_counts
+);
+
+
+Explanation:
+- The derived table pc counts playlists created by each user.
+- The subquery in the WHERE clause calculates the average playlist count across users who have created at least one playlist.
+- The main query displays usernames and playlist counts above that average.
+Note: Users who have created zero playlists are not included in this average because they do not appear in the Playlists table.
+4. Users who placed at least one order above the average order amount
+
+SELECT DISTINCT user_id
+FROM Orders
+WHERE total_amount > (
+    SELECT AVG(total_amount)
+    FROM Orders
+);
+
+
+Explanation: The subquery calculates the average amount of all orders. The main query returns the IDs of users with at least one order above that average. DISTINCT ensures that each user ID appears only once.
+
+Conclusion
+These queries demonstrate four common uses of SQL subqueries:
+1. WHERE clause — filter rows using an aggregate result.
+2. SELECT statement — calculate a value for each row.
+3. FROM clause — create a derived table for further analysis.
+4. WHERE clause with DISTINCT — identify users meeting a condition without duplicate IDs.
