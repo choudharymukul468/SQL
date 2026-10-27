@@ -1,0 +1,151 @@
+# SQL Assignment: String Functions in SQL
+
+## 1. Combine First Name and Last Name Using `CONCAT()`
+
+**SQL Query:**
+```sql
+SELECT
+    CONCAT(first_name, ' ', last_name) AS full_name
+FROM users;
+```
+
+**Explanation:**  
+The `CONCAT()` function combines `first_name` and `last_name` with a space between them. The combined result is displayed as `full_name`.
+
+**Sample Data — users**
+
+| first_name | last_name |
+|---|---|
+| Rahul | Sharma |
+| Priya | Patel |
+| Amit | Verma |
+
+**Sample Output**
+
+| full_name |
+|---|
+| Rahul Sharma |
+| Priya Patel |
+| Amit Verma |
+
+## 2. Convert Song Titles to Uppercase Using `UPPER()`
+
+**SQL Query:**
+```sql
+SELECT UPPER(song_title) AS song_title_uppercase
+FROM playlists;
+```
+
+**Explanation:**  
+The `UPPER()` function converts all lowercase letters in `song_title` to uppercase.
+
+**Sample Data — playlists**
+
+| song_title |
+|---|
+| kesariya |
+| tum hi ho |
+| apna bana le |
+
+**Sample Output**
+
+| song_title_uppercase |
+|---|
+| KESARIYA |
+| TUM HI HO |
+| APNA BANA LE |
+
+## 3. Remove Leading and Trailing Spaces Using `TRIM()`
+
+**SQL Query:**
+```sql
+SELECT TRIM(item_code) AS cleaned_item_code
+FROM food_items;
+```
+
+**Explanation:**  
+The `TRIM()` function removes spaces from the beginning and end of a string. It does not remove spaces between characters.
+
+**Sample Data — food_items**
+
+| item_code |
+|---|
+| `  FD101  ` |
+| ` FD202` |
+| `FD303  ` |
+
+**Sample Output**
+
+| cleaned_item_code |
+|---|
+| FD101 |
+| FD202 |
+| FD303 |
+
+## 4. Extract the Last Seven Characters Using `RIGHT()`
+
+**SQL Query:**
+```sql
+SELECT
+    RIGHT(imdb_id, 7) AS movie_number
+FROM movies;
+```
+
+**Explanation:**  
+The `RIGHT()` function extracts the specified number of characters from the right side of a string. Here, it extracts the last seven characters of `imdb_id`.
+
+**Sample Data — movies**
+
+| imdb_id |
+|---|
+| tt1234567 |
+| tt7654321 |
+| tt9876543 |
+
+**Sample Output**
+
+| movie_number |
+|---|
+| 1234567 |
+| 7654321 |
+| 9876543 |
+
+## 5. Replace Dashes with Underscores Using `REPLACE()`
+
+**SQL Query:**
+```sql
+SELECT
+    REPLACE(sku_code, '-', '_') AS updated_sku_code
+FROM products;
+```
+
+**Explanation:**  
+The `REPLACE()` function replaces every occurrence of a specified substring with another substring. This query replaces all dashes (`-`) with underscores (`_`) in `sku_code`.
+
+**Sample Data — products**
+
+| sku_code |
+|---|
+| MOB-123-XY |
+| LAP-456-ZZ |
+| TAB-789-AB |
+
+**Sample Output**
+
+| updated_sku_code |
+|---|
+| MOB_123_XY |
+| LAP_456_ZZ |
+| TAB_789_AB |
+
+## Conclusion
+
+This assignment demonstrates five SQL string functions:
+
+- `CONCAT()` — combines strings.
+- `UPPER()` — converts text to uppercase.
+- `TRIM()` — removes leading and trailing spaces.
+- `RIGHT()` — extracts characters from the right side.
+- `REPLACE()` — replaces specified characters or substrings.
+
+These functions are useful for formatting names, standardizing text, cleaning data, extracting codes, and transforming product identifiers.
