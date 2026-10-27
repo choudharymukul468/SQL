@@ -1,0 +1,87 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** Grouping Data and Filtering Aggregate Results in SQL
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Count Orders Placed by Each User
+
+**Objective:** To display the total number of orders placed by each user in the `food_orders` table.
+
+**SQL Query:**
+
+```sql
+SELECT
+    user_id,
+    COUNT(*) AS total_orders
+FROM food_orders
+GROUP BY user_id;
+```
+
+**Explanation:** The `COUNT(*)` function counts the orders, while `GROUP BY user_id` groups the records by each user.
+
+**Result:** Displays each user ID and their total number of orders.
+
+## Task 2: Calculate Total Spending by Payment Method
+
+**Objective:** To calculate the total amount spent through each payment method in the `transactions` table.
+
+**SQL Query:**
+
+```sql
+SELECT
+    payment_method,
+    SUM(amount) AS total_amount_spent
+FROM transactions
+GROUP BY payment_method;
+```
+
+**Explanation:** The `SUM()` function calculates the total transaction amount for each payment method. The `GROUP BY` clause groups transactions by payment method.
+
+**Result:** Displays each payment method and its total transaction amount.
+
+## Task 3: Find Movie Genres with Box Office Collections Above 10 Crore
+
+**Objective:** To display each movie genre and its total box office collection, showing only genres whose total collection exceeds 10 crore.
+
+**SQL Query:**
+
+```sql
+SELECT
+    genre,
+    SUM(box_office_collection) AS total_collection
+FROM movies
+GROUP BY genre
+HAVING SUM(box_office_collection) > 100000000;
+```
+
+**Explanation:** The `GROUP BY genre` clause groups movies by genre. The `SUM()` function calculates the total collection for each genre, and the `HAVING` clause filters the grouped results.
+
+**Result:** Displays only genres with total collections greater than ₹10 crore, assuming the collection is stored in rupees.
+
+**Note:** ₹10 crore = ₹100,000,000. If the database stores collections in crores rather than rupees, use `HAVING SUM(box_office_collection) > 10` instead.
+
+## Task 4: Find Users with More Than Two Hours of Combined Song Duration
+
+**Objective:** To identify users whose combined playlist song duration exceeds 7,200 seconds.
+
+**SQL Query:**
+
+```sql
+SELECT
+    user_id,
+    SUM(duration) AS total_duration
+FROM playlist
+GROUP BY user_id
+HAVING SUM(duration) > 7200;
+```
+
+**Explanation:** The `SUM(duration)` function calculates the total song duration for each user. The `GROUP BY user_id` clause groups songs by user, and `HAVING` returns only users whose combined duration exceeds 7,200 seconds (two hours).
+
+**Result:** Displays the user IDs and their total song durations for users with more than two hours of combined playlist duration.
+
+## Conclusion
+
+In this assignment, I learned how to use the `GROUP BY` clause to group records and aggregate functions such as `COUNT()` and `SUM()` to calculate totals. I also learned how the `HAVING` clause filters grouped results based on aggregate conditions.
+
