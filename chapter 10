@@ -1,0 +1,167 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** Combining Data Using UNION and UNION ALL
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Create AppOrders and InStoreOrders Tables
+
+**Objective:** To create two tables representing food delivery app orders and direct restaurant orders and insert at least three sample records into each table.
+
+### SQL Query
+
+```sql
+CREATE TABLE AppOrders (
+    order_id INT PRIMARY KEY,
+    customer_name VARCHAR(100),
+    amount DECIMAL(10, 2),
+    order_date DATE
+);
+
+CREATE TABLE InStoreOrders (
+    order_id INT PRIMARY KEY,
+    customer_name VARCHAR(100),
+    amount DECIMAL(10, 2),
+    order_date DATE
+);
+```
+
+### Insert Sample Records
+
+```sql
+INSERT INTO AppOrders VALUES
+(1, 'Aarav', 350.00, '2026-10-20'),
+(2, 'Priya', 500.00, '2026-10-21'),
+(3, 'Rahul', 250.00, '2026-10-22');
+
+INSERT INTO InStoreOrders VALUES
+(4, 'Priya', 400.00, '2026-10-20'),
+(5, 'Neha', 600.00, '2026-10-21'),
+(6, 'Karan', 300.00, '2026-10-22');
+```
+
+**Explanation:** `AppOrders` stores orders placed through a food delivery application, while `InStoreOrders` stores orders placed directly at the restaurant.
+
+**Result:** Both tables are created, and three sample records are inserted into each.
+
+## Task 2: Use UNION to Find Unique Customer Names
+
+**Objective:** To combine customer names from both tables and display each name only once.
+
+### SQL Query
+
+```sql
+SELECT customer_name
+FROM AppOrders
+
+UNION
+
+SELECT customer_name
+FROM InStoreOrders;
+```
+
+**Explanation:** The `UNION` operator combines the results of two queries and removes duplicate rows.
+
+**Expected Result:**
+
+| customer_name |
+|---|
+| Aarav |
+| Priya |
+| Rahul |
+| Neha |
+| Karan |
+
+**Result:** Five unique customer names are displayed, even though Priya appears in both tables.
+
+## Task 3: Use UNION ALL to Display Every Order
+
+**Objective:** To combine all records from both tables without removing duplicate rows.
+
+### SQL Query
+
+```sql
+SELECT order_id, customer_name, amount, order_date
+FROM AppOrders
+
+UNION ALL
+
+SELECT order_id, customer_name, amount, order_date
+FROM InStoreOrders;
+```
+
+**Explanation:** The `UNION ALL` operator combines all records from both queries and retains duplicates if present.
+
+**Expected Result:**
+
+| order_id | customer_name | amount | order_date |
+|---:|---|---:|---|
+| 1 | Aarav | 350.00 | 2026-10-20 |
+| 2 | Priya | 500.00 | 2026-10-21 |
+| 3 | Rahul | 250.00 | 2026-10-22 |
+| 4 | Priya | 400.00 | 2026-10-20 |
+| 5 | Neha | 600.00 | 2026-10-21 |
+| 6 | Karan | 300.00 | 2026-10-22 |
+
+**Result:** All six orders are displayed, including orders belonging to customers who appear in both tables.
+
+## Task 4: Demonstrate the Difference Between UNION and UNION ALL
+
+**Objective:** To demonstrate how `UNION` removes duplicate rows while `UNION ALL` retains them.
+
+### Step 1: Insert a duplicate customer name
+
+Priya already appears in both tables. The following additional records make the example explicit:
+
+```sql
+INSERT INTO AppOrders VALUES
+(7, 'Neha', 450.00, '2026-10-23');
+
+INSERT INTO InStoreOrders VALUES
+(8, 'Aarav', 200.00, '2026-10-23');
+```
+
+### Step 2: Run the UNION query
+
+```sql
+SELECT customer_name
+FROM AppOrders
+
+UNION
+
+SELECT customer_name
+FROM InStoreOrders;
+```
+
+**Expected result count:** 5 unique names — Aarav, Priya, Rahul, Neha, and Karan.
+
+### Step 3: Run the UNION ALL query
+
+```sql
+SELECT customer_name
+FROM AppOrders
+
+UNION ALL
+
+SELECT customer_name
+FROM InStoreOrders;
+```
+
+**Expected result count:** 8 rows, because every customer-name occurrence is retained.
+
+### Comparison
+
+| Feature | UNION | UNION ALL |
+|---|---|---|
+| Duplicate rows | Removes duplicates | Retains duplicates |
+| Result count in this example | 5 | 8 |
+| Performance | May require extra work to remove duplicates | Often faster because it does not remove duplicates |
+| Best use | When unique results are required | When every occurrence must be retained |
+
+**Result:** `UNION` returns five unique names, while `UNION ALL` returns eight rows after the additional records are inserted.
+
+## Conclusion
+
+In this assignment, I learned how to create tables, insert sample data, and combine query results using `UNION` and `UNION ALL`. The `UNION` operator removes duplicate rows, whereas `UNION ALL` preserves all rows. These operators are useful for combining food delivery and in-store restaurant data.
+
