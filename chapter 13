@@ -1,0 +1,273 @@
+# SQL ASSIGNMENT
+
+## Topic: Window Functions in SQL
+
+**Subject:** Database Management System (DBMS)
+
+**Submitted By:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Roll Number:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Class / Semester:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Submitted To:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+---
+
+## Objective
+
+To understand and implement SQL window functions using `OVER()`, `PARTITION BY`, `SUM()`, and `AVG()` to analyze order amounts, playlist durations, and movie ratings while retaining individual records.
+
+---
+
+## Question 1: Display Each Order Along with the Total Amount of All Orders
+
+### Step 1: Create the Orders Table
+
+```sql
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    user_id INT,
+    order_amount DECIMAL(10,2),
+    app_name VARCHAR(50)
+);
+```
+
+### Step 2: Insert Sample Records
+
+```sql
+INSERT INTO Orders VALUES
+(1, 101, 500.00, 'Zomato'),
+(2, 102, 800.00, 'Swiggy'),
+(3, 101, 300.00, 'Flipkart'),
+(4, 103, 1200.00, 'Zomato'),
+(5, 102, 450.00, 'Swiggy'),
+(6, 104, 900.00, 'Flipkart'),
+(7, 103, 650.00, 'Zomato'),
+(8, 101, 700.00, 'Swiggy'),
+(9, 104, 350.00, 'Flipkart'),
+(10, 105, 1100.00, 'Zomato');
+```
+
+### Step 3: SQL Query
+
+```sql
+SELECT
+    order_id,
+    user_id,
+    order_amount,
+    app_name,
+    SUM(order_amount) OVER() AS total_order_amount
+FROM Orders
+ORDER BY order_id;
+```
+
+### Result Output
+
+| order_id | user_id | order_amount | app_name | total_order_amount |
+| -------: | ------: | -----------: | -------- | -----------------: |
+|        1 |     101 |       500.00 | Zomato   |            6950.00 |
+|        2 |     102 |       800.00 | Swiggy   |            6950.00 |
+|        3 |     101 |       300.00 | Flipkart |            6950.00 |
+|        4 |     103 |      1200.00 | Zomato   |            6950.00 |
+|        5 |     102 |       450.00 | Swiggy   |            6950.00 |
+|        6 |     104 |       900.00 | Flipkart |            6950.00 |
+|        7 |     103 |       650.00 | Zomato   |            6950.00 |
+|        8 |     101 |       700.00 | Swiggy   |            6950.00 |
+|        9 |     104 |       350.00 | Flipkart |            6950.00 |
+|       10 |     105 |      1100.00 | Zomato   |            6950.00 |
+
+**Explanation:** `SUM(order_amount) OVER()` calculates the total amount of all orders and displays the same total beside every order. The total of the ten sample orders is 6,950.00.
+
+---
+
+## Question 2: Display Each User's Orders and Average Order Amount
+
+### SQL Query
+
+```sql
+SELECT
+    user_id,
+    order_id,
+    order_amount,
+    AVG(order_amount) OVER (
+        PARTITION BY user_id
+    ) AS average_order_amount
+FROM Orders
+ORDER BY user_id, order_id;
+```
+
+### Result Output
+
+| user_id | order_id | order_amount | average_order_amount |
+| ------: | -------: | -----------: | -------------------: |
+|     101 |        1 |       500.00 |               500.00 |
+|     101 |        3 |       300.00 |               500.00 |
+|     101 |        8 |       700.00 |               500.00 |
+|     102 |        2 |       800.00 |               625.00 |
+|     102 |        5 |       450.00 |               625.00 |
+|     103 |        4 |      1200.00 |               925.00 |
+|     103 |        7 |       650.00 |               925.00 |
+|     104 |        6 |       900.00 |               625.00 |
+|     104 |        9 |       350.00 |               625.00 |
+|     105 |       10 |      1100.00 |              1100.00 |
+
+**Explanation:** `AVG(order_amount) OVER (PARTITION BY user_id)` calculates a separate average for each user while keeping every order in the output.
+
+---
+
+## Question 3: Display Each Song's Duration and Each User's Total Playlist Duration
+
+### Step 1: Create the Playlist Table
+
+```sql
+CREATE TABLE Playlist (
+    song_id INT PRIMARY KEY,
+    user_id INT,
+    duration_sec INT
+);
+```
+
+### Step 2: Insert Sample Records
+
+```sql
+INSERT INTO Playlist VALUES
+(1, 101, 180),
+(2, 101, 240),
+(3, 102, 200),
+(4, 102, 220),
+(5, 101, 150),
+(6, 103, 300),
+(7, 103, 210),
+(8, 102, 180);
+```
+
+### Step 3: SQL Query
+
+```sql
+SELECT
+    song_id,
+    user_id,
+    duration_sec,
+    SUM(duration_sec) OVER (
+        PARTITION BY user_id
+    ) AS total_duration_sec
+FROM Playlist
+ORDER BY user_id, song_id;
+```
+
+### Result Output
+
+| song_id | user_id | duration_sec | total_duration_sec |
+| ------: | ------: | -----------: | -----------------: |
+|       1 |     101 |          180 |                570 |
+|       2 |     101 |          240 |                570 |
+|       5 |     101 |          150 |                570 |
+|       3 |     102 |          200 |                600 |
+|       4 |     102 |          220 |                600 |
+|       8 |     102 |          180 |                600 |
+|       6 |     103 |          300 |                510 |
+|       7 |     103 |          210 |                510 |
+
+**Explanation:** `SUM(duration_sec) OVER (PARTITION BY user_id)` calculates the total duration of songs for each user. The individual song records remain visible.
+
+---
+
+## Question 4: Calculate Movie Average Ratings and Each User's Difference from the Average
+
+### Step 1: Create the MovieRatings Table
+
+```sql
+CREATE TABLE MovieRatings (
+    rating_id INT PRIMARY KEY,
+    user_id INT,
+    movie_name VARCHAR(100),
+    rating DECIMAL(2,1)
+);
+```
+
+### Step 2: Insert Sample Records
+
+```sql
+INSERT INTO MovieRatings VALUES
+(1, 101, 'Jawan', 5.0),
+(2, 102, 'Jawan', 4.0),
+(3, 103, 'Jawan', 3.0),
+(4, 101, 'Pathaan', 4.0),
+(5, 102, 'Pathaan', 5.0),
+(6, 103, 'Pathaan', 4.0),
+(7, 104, 'Jawan', 4.0),
+(8, 104, 'Pathaan', 3.0);
+```
+
+### Step 3: SQL Query
+
+```sql
+SELECT
+    rating_id,
+    user_id,
+    movie_name,
+    rating,
+    AVG(rating) OVER (
+        PARTITION BY movie_name
+    ) AS average_movie_rating,
+    rating - AVG(rating) OVER (
+        PARTITION BY movie_name
+    ) AS difference_from_average
+FROM MovieRatings
+ORDER BY movie_name, rating_id;
+```
+
+### Result Output
+
+| rating_id | user_id | movie_name | rating | average_movie_rating | difference_from_average |
+| --------: | ------: | ---------- | -----: | -------------------: | ----------------------: |
+|         1 |     101 | Jawan      |    5.0 |                  4.0 |                     1.0 |
+|         2 |     102 | Jawan      |    4.0 |                  4.0 |                     0.0 |
+|         3 |     103 | Jawan      |    3.0 |                  4.0 |                    -1.0 |
+|         7 |     104 | Jawan      |    4.0 |                  4.0 |                     0.0 |
+|         4 |     101 | Pathaan    |    4.0 |                  4.0 |                     0.0 |
+|         5 |     102 | Pathaan    |    5.0 |                  4.0 |                     1.0 |
+|         6 |     103 | Pathaan    |    4.0 |                  4.0 |                     0.0 |
+|         8 |     104 | Pathaan    |    3.0 |                  4.0 |                    -1.0 |
+
+**Explanation:** The `AVG()` window function calculates the average rating for each movie. Subtracting the average from the user's rating shows the difference.
+
+- **Positive difference:** The rating is above average.
+- **Zero difference:** The rating equals the average.
+- **Negative difference:** The rating is below average.
+
+---
+
+## Database Compatibility Notes
+
+The queries in this assignment are compatible with modern versions of the following database systems:
+
+| Database        | Compatibility                                            |
+| --------------- | -------------------------------------------------------- |
+| MySQL 8.0+      | Supports all window functions used in this assignment.   |
+| PostgreSQL      | Supports `OVER()`, `PARTITION BY`, `SUM()`, and `AVG()`. |
+| SQL Server      | Supports the window functions used here.                 |
+| Oracle Database | Supports the window functions used here.                 |
+| SQLite 3.25.0+  | Supports the window functions used here.                 |
+
+**Important points:**
+
+1. Window functions calculate values across rows without collapsing the rows into a single result.
+2. `OVER()` operates across the applicable set of rows.
+3. `PARTITION BY` separates rows into groups for calculations, such as one group per user or movie.
+4. The `ORDER BY` clause makes the displayed result order predictable.
+5. The `CREATE TABLE` and `INSERT` statements may require minor adjustments for specific database versions or existing table names.
+
+**Recommended database:** MySQL 8.0 or later.
+
+---
+
+## Conclusion
+
+In this assignment, we learned how to use SQL window functions to calculate overall order totals, user-wise average order amounts, playlist durations, and movie rating differences. The `OVER()` clause performs calculations across rows, while `PARTITION BY` performs calculations separately for each group.
+
+Window functions are useful for data analysis because they provide aggregate information without removing individual records.
+
