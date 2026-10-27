@@ -1,0 +1,248 @@
+# SQL ASSIGNMENT
+## Topic: Common Table Expressions (CTEs)
+
+**Subject:** Database Management System (DBMS)
+
+**Submitted By:** __________________________
+
+**Roll Number:** __________________________
+
+**Class / Semester:** __________________________
+
+**Submitted To:** __________________________
+
+**Date:** __________________________
+
+---
+
+## Objective
+
+To understand and implement Common Table Expressions (CTEs) using the `WITH` clause and recursive CTEs for data filtering, aggregation, ranking, and date generation.
+
+---
+
+## Question 1: Find the Top 3 Most-Followed Spotify Artists
+
+### Sample Table: SpotifyArtists
+
+| artist_id | name | followers |
+|---:|---|---:|
+| 1 | Arijit Singh | 12000000 |
+| 2 | Taylor Swift | 95000000 |
+| 3 | Ed Sheeran | 80000000 |
+| 4 | Neha Kakkar | 7000000 |
+| 5 | The Weeknd | 85000000 |
+
+### SQL Query
+
+```sql
+WITH TopArtists AS (
+    SELECT artist_id, name, followers
+    FROM SpotifyArtists
+    ORDER BY followers DESC
+    LIMIT 3
+)
+SELECT *
+FROM TopArtists;
+```
+
+### Result Output
+
+| artist_id | name | followers |
+|---:|---|---:|
+| 2 | Taylor Swift | 95000000 |
+| 5 | The Weeknd | 85000000 |
+| 3 | Ed Sheeran | 80000000 |
+
+**Explanation:** The `TopArtists` CTE selects the three artists with the highest follower counts.
+
+---
+
+## Question 2: Find the Month with the Highest Total Sales in 2023
+
+### Sample Table: FlipkartOrders
+
+| order_id | user_id | order_date | total_amount |
+|---:|---:|---|---:|
+| 101 | 1 | 2023-01-10 | 5000 |
+| 102 | 2 | 2023-01-15 | 3000 |
+| 103 | 1 | 2023-02-05 | 7000 |
+| 104 | 3 | 2023-02-20 | 6000 |
+| 105 | 2 | 2023-03-12 | 4000 |
+| 106 | 3 | 2023-03-25 | 2000 |
+
+### SQL Query
+
+```sql
+WITH MonthlyTotals AS (
+    SELECT
+        EXTRACT(MONTH FROM order_date) AS month,
+        SUM(total_amount) AS total_sales
+    FROM FlipkartOrders
+    WHERE order_date >= '2023-01-01'
+      AND order_date < '2024-01-01'
+    GROUP BY EXTRACT(MONTH FROM order_date)
+)
+SELECT month, total_sales
+FROM MonthlyTotals
+ORDER BY total_sales DESC
+LIMIT 1;
+```
+
+### Result Output
+
+| month | total_sales |
+|---:|---:|
+| 2 | 13000 |
+
+**Explanation:** The `MonthlyTotals` CTE calculates total sales for each month. February has the highest total sales of 13,000.
+
+---
+
+## Question 3: Generate the Next 7 Days Using a Recursive CTE
+
+### Sample Table Structure: CalendarDays
+
+| Column | Data Type |
+|---|---|
+| day_date | DATE |
+
+This question generates dates using a recursive CTE, so no existing sample records are required.
+
+### SQL Query (MySQL 8.0+)
+
+```sql
+WITH RECURSIVE CalendarDays AS (
+    SELECT CURRENT_DATE AS day_date
+
+    UNION ALL
+
+    SELECT DATE_ADD(day_date, INTERVAL 1 DAY)
+    FROM CalendarDays
+    WHERE day_date < DATE_ADD(CURRENT_DATE, INTERVAL 6 DAY)
+)
+SELECT day_date
+FROM CalendarDays;
+```
+
+### Sample Result Output
+
+*Example assuming today is 2026-10-27.*
+
+| day_date |
+|---|
+| 2026-10-27 |
+| 2026-10-28 |
+| 2026-10-29 |
+| 2026-10-30 |
+| 2026-10-31 |
+| 2026-11-01 |
+| 2026-11-02 |
+
+**Explanation:** The recursive CTE begins with the current date and adds one day in each step. It produces seven dates, including today and the following six days. The actual output changes according to the date on which the query runs.
+
+---
+
+## Question 4: Find Restaurants in Cities with an Average Rating Above 4.0
+
+### Sample Table: ZomatoRestaurants
+
+| id | name | city | rating |
+|---:|---|---|---:|
+| 1 | Spice Garden | Mumbai | 4.5 |
+| 2 | Food Palace | Mumbai | 4.3 |
+| 3 | Tasty Bites | Delhi | 3.8 |
+| 4 | Royal Kitchen | Delhi | 4.0 |
+| 5 | Green Bowl | Pune | 4.6 |
+| 6 | Urban Cafe | Pune | 4.4 |
+
+### SQL Query
+
+```sql
+WITH CityAverages AS (
+    SELECT city, AVG(rating) AS average_rating
+    FROM ZomatoRestaurants
+    GROUP BY city
+)
+SELECT
+    z.id,
+    z.name,
+    z.city,
+    z.rating
+FROM ZomatoRestaurants z
+JOIN CityAverages c
+    ON z.city = c.city
+WHERE c.average_rating > 4.0;
+```
+
+### Result Output
+
+| id | name | city | rating |
+|---:|---|---|---:|
+| 1 | Spice Garden | Mumbai | 4.5 |
+| 2 | Food Palace | Mumbai | 4.3 |
+| 5 | Green Bowl | Pune | 4.6 |
+| 6 | Urban Cafe | Pune | 4.4 |
+
+**Explanation:** Mumbai's average rating is 4.4 and Pune's is 4.5. Delhi's average is 3.9, so restaurants in Delhi are excluded.
+
+---
+
+## Question 5: Find IPL Teams with More Than 2000 Runs in 2023
+
+### Sample Table: IPLMatches
+
+| match_id | team | runs | match_year |
+|---:|---|---:|---:|
+| 1 | Chennai Super Kings | 220 | 2023 |
+| 2 | Mumbai Indians | 210 | 2023 |
+| 3 | Chennai Super Kings | 230 | 2023 |
+| 4 | Mumbai Indians | 240 | 2023 |
+| 5 | Chennai Super Kings | 250 | 2023 |
+| 6 | Mumbai Indians | 220 | 2023 |
+| 7 | Gujarat Titans | 180 | 2023 |
+| 8 | Gujarat Titans | 200 | 2023 |
+
+### SQL Query
+
+```sql
+WITH TeamRuns AS (
+    SELECT
+        team,
+        SUM(runs) AS total_runs
+    FROM IPLMatches
+    WHERE match_year = 2023
+    GROUP BY team
+)
+SELECT team, total_runs
+FROM TeamRuns
+WHERE total_runs > 2000
+ORDER BY total_runs DESC;
+```
+
+### Result Output
+
+| team | total_runs |
+|---|---:|
+| No rows returned | — |
+
+**Explanation:** The sample records above contain only a few matches per team, so none reaches 2,000 runs. To demonstrate the intended result, the sample dataset must include enough matches or aggregated runs to exceed the threshold.
+
+### Illustrative Output if the Teams Have More Than 2000 Runs
+
+| team | total_runs |
+|---|---:|
+| Chennai Super Kings | 2500 |
+| Mumbai Indians | 2300 |
+
+*These illustrative totals are examples of what the query could return with a larger dataset; they are not the totals calculated from the sample rows above.*
+
+---
+
+## Conclusion
+
+Common Table Expressions help organize complex SQL queries into readable steps. In this assignment, CTEs were used to select top records, calculate monthly sales, generate a sequence of dates, compare city-wise average ratings, and calculate team-wise runs.
+
+Recursive CTEs are especially useful for generating sequences, while regular CTEs simplify grouping, filtering, and aggregation.
+
+**End of Assignment**
