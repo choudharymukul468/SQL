@@ -1,0 +1,234 @@
+**Subject:** Database Management System (DBMS)  
+**Topic:** CREATE TABLE, INSERT, INNER JOIN, LEFT JOIN, RIGHT JOIN, and Foreign Keys
+
+**Name:** ____________________  
+**Class/Roll No.:** ____________________  
+**Date:** ____________________
+
+## Task 1: Create Users and Orders Tables
+
+**Objective:** To create two tables and insert sample records, ensuring some users have no orders.
+
+**SQL Query:**
+
+```sql
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY,
+    username VARCHAR(50),
+    city VARCHAR(50)
+);
+
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY,
+    user_id INT,
+    product VARCHAR(100),
+    amount DECIMAL(10, 2)
+);
+```
+
+**Insert sample users:**
+
+```sql
+INSERT INTO Users (user_id, username, city)
+VALUES
+(1, 'Aarav', 'Ahmedabad'),
+(2, 'Priya', 'Surat'),
+(3, 'Rahul', 'Vadodara');
+```
+
+**Insert sample orders:**
+
+```sql
+INSERT INTO Orders (order_id, user_id, product, amount)
+VALUES
+(101, 1, 'Pizza', 350.00),
+(102, 1, 'Burger', 180.00),
+(103, 2, 'Biryani', 250.00),
+(104, 2, 'Sandwich', 120.00),
+(105, 99, 'Pasta', 300.00);
+```
+
+**Explanation:** The `Users` table stores user details, while the `Orders` table stores order information. Rahul has no orders, and order 105 references user ID 99, which does not exist in `Users`.
+
+**Result:** Two tables are created with three users and five orders. The sample data allows us to test users without orders and orders without matching users.
+
+## Task 2: INNER JOIN — Users Who Have Placed Orders
+
+**Objective:** To display usernames and their ordered products, including only users with matching orders.
+
+**SQL Query:**
+
+```sql
+SELECT
+    Users.username,
+    Orders.product
+FROM Users
+INNER JOIN Orders
+    ON Users.user_id = Orders.user_id;
+```
+
+**Explanation:** `INNER JOIN` returns only records that have matching `user_id` values in both tables.
+
+**Expected result:**
+
+| username | product |
+|---|---|
+| Aarav | Pizza |
+| Aarav | Burger |
+| Priya | Biryani |
+| Priya | Sandwich |
+
+**Result:** Only users with matching orders are displayed. Rahul is excluded because he has no orders, and the order belonging to user ID 99 is excluded because that user does not exist.
+
+## Task 3: LEFT JOIN — All Users and Their Orders
+
+**Objective:** To display every username along with their ordered products, including users without orders.
+
+**SQL Query:**
+
+```sql
+SELECT
+    Users.username,
+    Orders.product
+FROM Users
+LEFT JOIN Orders
+    ON Users.user_id = Orders.user_id;
+```
+
+**Explanation:** `LEFT JOIN` returns every record from the `Users` table. If a user has no matching order, the order columns contain `NULL`.
+
+**Expected result:**
+
+| username | product |
+|---|---|
+| Aarav | Pizza |
+| Aarav | Burger |
+| Priya | Biryani |
+| Priya | Sandwich |
+| Rahul | NULL |
+
+**Result:** All users are displayed, including Rahul, who has no orders.
+
+## Task 4: RIGHT JOIN — All Orders and Corresponding Usernames
+
+**Objective:** To display every order and its corresponding username, showing `NULL` when no matching user exists.
+
+**SQL Query:**
+
+```sql
+SELECT
+    Orders.order_id,
+    Orders.product,
+    Users.username
+FROM Users
+RIGHT JOIN Orders
+    ON Users.user_id = Orders.user_id;
+```
+
+**Explanation:** `RIGHT JOIN` returns all records from the `Orders` table, even when no matching user exists in `Users`. In that case, `Users.username` is `NULL`.
+
+**Expected result:**
+
+| order_id | product | username |
+|---:|---|---|
+| 101 | Pizza | Aarav |
+| 102 | Burger | Aarav |
+| 103 | Biryani | Priya |
+| 104 | Sandwich | Priya |
+| 105 | Pasta | NULL |
+
+**Result:** All five orders are displayed. Order 105 has a `NULL` username because user ID 99 does not exist.
+
+**Note:** The sample data already demonstrates this case. No user needs to be deleted to test it.
+
+## Task 5: Customer Segments and Total Order Amount
+
+**Objective:** To create a `CustomerSegments` table, link it to `Users` using a foreign key, and calculate total order amounts for each user and their segment.
+
+**Step 1: Create the CustomerSegments table**
+
+```sql
+CREATE TABLE CustomerSegments (
+    segment_id INT PRIMARY KEY,
+    segment_name VARCHAR(50)
+);
+```
+
+**Step 2: Add a segment reference to Users**
+
+```sql
+ALTER TABLE Users
+ADD COLUMN segment_id INT;
+
+ALTER TABLE Users
+ADD CONSTRAINT fk_users_segment
+FOREIGN KEY (segment_id)
+REFERENCES CustomerSegments(segment_id);
+```
+
+**Step 3: Insert sample segments**
+
+```sql
+INSERT INTO CustomerSegments (segment_id, segment_name)
+VALUES
+(1, 'Regular'),
+(2, 'Premium');
+```
+
+**Step 4: Assign segments to users**
+
+```sql
+UPDATE Users
+SET segment_id = 1
+WHERE user_id = 1;
+
+UPDATE Users
+SET segment_id = 2
+WHERE user_id = 2;
+
+UPDATE Users
+SET segment_id = 1
+WHERE user_id = 3;
+```
+
+**Step 5: Display usernames, segment names, and total order amounts**
+
+```sql
+SELECT
+    U.username,
+    CS.segment_name,
+    COALESCE(SUM(O.amount), 0) AS total_order_amount
+FROM Users U
+LEFT JOIN CustomerSegments CS
+    ON U.segment_id = CS.segment_id
+LEFT JOIN Orders O
+    ON U.user_id = O.user_id
+GROUP BY
+    U.user_id,
+    U.username,
+    CS.segment_id,
+    CS.segment_name;
+```
+
+**Explanation:**
+
+- `CustomerSegments` stores customer segment details.
+- A foreign key links each user's `segment_id` to a valid segment.
+- `LEFT JOIN` keeps users even when they have no orders.
+- `SUM(O.amount)` calculates the total order amount for each user.
+- `COALESCE(..., 0)` displays zero for users without orders.
+
+**Expected result:**
+
+| username | segment_name | total_order_amount |
+|---|---|---:|
+| Aarav | Regular | 530.00 |
+| Priya | Premium | 370.00 |
+| Rahul | Regular | 0.00 |
+
+**Result:** Each user is displayed with their customer segment and total order amount.
+
+## Conclusion
+
+In this assignment, I learned how to create tables, insert records, and connect related tables using SQL joins. `INNER JOIN` returns matching records, `LEFT JOIN` preserves all records from the left table, and `RIGHT JOIN` preserves all records from the right table. I also learned how to create foreign key relationships and use aggregate functions to analyze customer order data.
+
