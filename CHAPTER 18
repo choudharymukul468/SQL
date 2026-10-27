@@ -1,0 +1,200 @@
+# SQL Assignment: Creating and Managing Views
+
+## 1. Create a View Named `TopRatedRestaurants`
+
+**SQL Query:**
+```sql
+CREATE VIEW TopRatedRestaurants AS
+SELECT
+    restaurant_name,
+    AVG(rating) AS average_rating,
+    COUNT(*) AS total_reviews
+FROM RestaurantReviews
+GROUP BY restaurant_name
+HAVING AVG(rating) > 4.0;
+```
+
+**Explanation:**
+- `CREATE VIEW` creates a virtual table based on a query.
+- `AVG(rating)` calculates the average restaurant rating.
+- `COUNT(*)` counts the reviews for each restaurant.
+- `GROUP BY restaurant_name` groups reviews by restaurant.
+- `HAVING AVG(rating) > 4.0` includes only restaurants whose average rating exceeds 4.0.
+
+**Sample Data — RestaurantReviews**
+
+| restaurant_name | rating |
+|---|---:|
+| Spice Garden | 4.5 |
+| Spice Garden | 4.2 |
+| Food Corner | 3.8 |
+| Food Corner | 4.0 |
+| Urban Bites | 4.8 |
+| Urban Bites | 4.6 |
+
+**Sample Output — TopRatedRestaurants**
+
+| restaurant_name | average_rating | total_reviews |
+|---|---:|---:|
+| Spice Garden | 4.35 | 2 |
+| Urban Bites | 4.70 | 2 |
+
+## 2. Update the View to Include the City Column
+
+Use an `INNER JOIN` to combine restaurant information with review data. In MySQL, replace the existing view definition using `CREATE OR REPLACE VIEW`.
+
+**SQL Query:**
+```sql
+CREATE OR REPLACE VIEW TopRatedRestaurants AS
+SELECT
+    r.restaurant_name,
+    r.city,
+    AVG(rr.rating) AS average_rating,
+    COUNT(*) AS total_reviews
+FROM Restaurants r
+INNER JOIN RestaurantReviews rr
+    ON r.restaurant_id = rr.restaurant_id
+GROUP BY
+    r.restaurant_id,
+    r.restaurant_name,
+    r.city
+HAVING AVG(rr.rating) > 4.0;
+```
+
+**Explanation:**
+- `Restaurants` contains restaurant details, including city.
+- `RestaurantReviews` contains individual ratings.
+- `INNER JOIN` matches restaurants to their reviews using `restaurant_id`.
+- `GROUP BY` calculates statistics for each restaurant.
+- `HAVING` filters out restaurants whose average rating is 4.0 or lower.
+
+**Sample Data — Restaurants**
+
+| restaurant_id | restaurant_name | city |
+|---:|---|---|
+| 1 | Spice Garden | Ahmedabad |
+| 2 | Food Corner | Surat |
+| 3 | Urban Bites | Mumbai |
+
+**Sample Output — TopRatedRestaurants**
+
+| restaurant_name | city | average_rating | total_reviews |
+|---|---|---:|---:|
+| Spice Garden | Ahmedabad | 4.35 | 2 |
+| Urban Bites | Mumbai | 4.70 | 2 |
+
+*Note: The sample output assumes the review records from Question 1 are associated with the corresponding restaurant IDs.*
+
+## 3. Try to Update the Average Rating Through the View
+
+**SQL Query:**
+```sql
+UPDATE TopRatedRestaurants
+SET average_rating = 5.0
+WHERE restaurant_name = 'Spice Garden';
+```
+
+**Expected Result:** MySQL will reject this update because the view contains an aggregate function, `AVG()`, along with `GROUP BY` and `HAVING`.
+
+A typical MySQL error is:
+
+```text
+ERROR 1288 (HY000): The target table TopRatedRestaurants of the UPDATE is not updatable
+```
+
+The exact error wording can vary by MySQL version and execution context; the message above is representative, not a verified result from a live database.
+
+**Why does this happen?**
+
+1. **Aggregate functions:** `AVG(rating)` is calculated from multiple review rows, so the database cannot determine which individual rating should be changed to make the average equal to 5.0.
+2. **Grouping:** `GROUP BY` combines multiple review records into one result row.
+3. **View limitations:** Views containing aggregate functions and grouping are generally not updatable in MySQL.
+
+**Correct approach:** Update the underlying review records if you have a legitimate reason to change the data. Do not directly overwrite the calculated average in the view.
+
+## 4. Create a `DailyOrderSummary` View for the Last 30 Days
+
+**SQL Query:**
+```sql
+CREATE VIEW DailyOrderSummary AS
+SELECT
+    DATE(order_date) AS order_day,
+    COUNT(*) AS total_orders,
+    SUM(total_amount) AS total_revenue
+FROM SwiggyOrders
+WHERE order_date >= CURRENT_DATE - INTERVAL 29 DAY
+  AND order_date < CURRENT_DATE + INTERVAL 1 DAY
+GROUP BY DATE(order_date);
+```
+
+**Explanation:**
+- `WHERE` filters orders to the current date and the preceding 29 calendar days, giving a 30-calendar-day window.
+- `DATE(order_date)` extracts the date, even if `order_date` contains a time.
+- `COUNT(*)` counts orders per day.
+- `SUM(total_amount)` calculates daily revenue.
+- `GROUP BY DATE(order_date)` produces one row per date with orders.
+
+**Sample Data — SwiggyOrders**
+
+| order_date | total_amount |
+|---|---:|
+| 2026-10-25 10:30:00 | 250 |
+| 2026-10-25 19:15:00 | 400 |
+| 2026-10-26 13:00:00 | 300 |
+| 2026-10-27 12:30:00 | 500 |
+
+**Sample Output — DailyOrderSummary**
+
+| order_day | total_orders | total_revenue |
+|---|---:|---:|
+| 2026-10-25 | 2 | 650 |
+| 2026-10-26 | 1 | 300 |
+| 2026-10-27 | 1 | 500 |
+
+*Note: The output is illustrative and assumes the current date is October 27, 2026. Dates without orders will not appear unless you join against a calendar table.*
+
+## 5. Three Best Practices for SQL Views in Analytics Dashboards
+
+### Practice 1: Use Clear and Meaningful Column Names
+
+**Example:** In a Flipkart sales view, use `total_revenue` instead of an unclear alias such as `sum1`.
+
+```sql
+CREATE VIEW FlipkartSalesSummary AS
+SELECT
+    product_id,
+    SUM(sale_amount) AS total_revenue
+FROM FlipkartSales
+GROUP BY product_id;
+```
+
+### Practice 2: Filter and Aggregate Data Appropriately
+
+**Example:** Create a view that reports sales only for completed Flipkart orders.
+
+```sql
+CREATE VIEW CompletedFlipkartSales AS
+SELECT
+    product_id,
+    SUM(sale_amount) AS total_revenue
+FROM FlipkartSales
+WHERE order_status = 'Completed'
+GROUP BY product_id;
+```
+
+### Practice 3: Protect Sensitive Information
+
+**Example:** Expose product sales totals without including customers' phone numbers or addresses in a dashboard view.
+
+```sql
+CREATE VIEW FlipkartProductRevenue AS
+SELECT
+    product_id,
+    SUM(sale_amount) AS total_revenue
+FROM FlipkartSales
+GROUP BY product_id;
+```
+
+## Conclusion
+
+SQL views simplify analytics by presenting reusable query results as virtual tables. They help dashboards display summarized information, filter records, and limit exposure of unnecessary data. However, views that use aggregation, grouping, or other non-updatable constructs generally cannot be modified directly. For reliable reporting, use clear column names, suitable filters, and carefully designed joins and aggregations.
