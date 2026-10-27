@@ -1,0 +1,235 @@
+**Subject:** Database Management System (DBMS)
+**Topic:** FULL OUTER JOIN, SELF JOIN, CROSS JOIN, and AI-Assisted SQL
+
+**Name:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+**Class/Roll No.:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+**Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## Task 1: FULL OUTER JOIN — Influencers and Brands
+
+**Objective:** To display all influencers and brands, matching records based on their city. Unmatched records should show `NULL` on the other side.
+
+### Step 1: Create the tables
+
+```sql
+CREATE TABLE influencers (
+    influencer_id INT PRIMARY KEY,
+    influencer_name VARCHAR(100),
+    city VARCHAR(50)
+);
+
+CREATE TABLE brands (
+    brand_id INT PRIMARY KEY,
+    brand_name VARCHAR(100),
+    city VARCHAR(50)
+);
+```
+
+### Step 2: Insert sample data
+
+```sql
+INSERT INTO influencers VALUES
+(1, 'Aarav', 'Ahmedabad'),
+(2, 'Priya', 'Surat'),
+(3, 'Rahul', 'Mumbai');
+
+INSERT INTO brands VALUES
+(1, 'Fashion Hub', 'Ahmedabad'),
+(2, 'Style Zone', 'Surat'),
+(3, 'Tech World', 'Delhi');
+```
+
+### Step 3: Write the FULL OUTER JOIN query
+
+MySQL does not directly support `FULL OUTER JOIN`, so we can combine `LEFT JOIN` and `RIGHT JOIN` using `UNION`.
+
+```sql
+SELECT
+    i.influencer_name,
+    b.brand_name
+FROM influencers i
+LEFT JOIN brands b
+    ON i.city = b.city
+
+UNION
+
+SELECT
+    i.influencer_name,
+    b.brand_name
+FROM influencers i
+RIGHT JOIN brands b
+    ON i.city = b.city;
+```
+
+**Explanation:** The `LEFT JOIN` includes every influencer, while the `RIGHT JOIN` includes every brand. `UNION` combines the results and removes duplicate rows.
+
+**Expected result:**
+
+| influencer_name | brand_name  |
+| --------------- | ----------- |
+| Aarav           | Fashion Hub |
+| Priya           | Style Zone  |
+| Rahul           | NULL        |
+| NULL            | Tech World  |
+
+**Result:** All influencers and brands are displayed, including those without a matching city.
+
+## Task 2: SELF JOIN — Playlists and Parent Playlists
+
+**Objective:** To display each playlist alongside the name of its parent playlist.
+
+### SQL Query
+
+```sql
+SELECT
+    p.playlist_name AS playlist_name,
+    parent.playlist_name AS parent_playlist_name
+FROM playlists p
+LEFT JOIN playlists parent
+    ON p.parent_playlist_id = parent.id;
+```
+
+**Explanation:** A `SELF JOIN` joins a table to itself. Here, `p` represents the child playlist, while `parent` represents its parent playlist. The `LEFT JOIN` also includes playlists that have no parent.
+
+**Example result:**
+
+| playlist_name  | parent_playlist_name |
+| -------------- | -------------------- |
+| Workout Mix    | My Music             |
+| Relaxing Songs | My Music             |
+| My Music       | NULL                 |
+
+**Result:** Each playlist is displayed with its parent playlist's name, where available.
+
+## Task 3: CROSS JOIN — Users and Offers
+
+**Objective:** To generate all possible combinations of users and promotional offers.
+
+### Step 1: Create the tables
+
+```sql
+CREATE TABLE users (
+    user_id INT PRIMARY KEY,
+    user_name VARCHAR(100)
+);
+
+CREATE TABLE offers (
+    offer_id INT PRIMARY KEY,
+    offer_title VARCHAR(100)
+);
+```
+
+### Step 2: Insert sample data
+
+```sql
+INSERT INTO users VALUES
+(1, 'Aarav'),
+(2, 'Priya'),
+(3, 'Rahul');
+
+INSERT INTO offers VALUES
+(1, '10% Off'),
+(2, 'Free Delivery'),
+(3, 'Cashback Offer');
+```
+
+### Step 3: Write the CROSS JOIN query
+
+```sql
+-- A CROSS JOIN generates every user-offer combination,
+-- useful for preparing a Flipkart-style personalized
+-- offer campaign before applying targeting rules.
+SELECT
+    u.user_name,
+    o.offer_title
+FROM users u
+CROSS JOIN offers o;
+```
+
+**Explanation:** A `CROSS JOIN` produces every possible combination of rows from both tables. With 3 users and 3 offers, the query returns 9 combinations.
+
+**Example result:**
+
+| user_name | offer_title    |
+| --------- | -------------- |
+| Aarav     | 10% Off        |
+| Aarav     | Free Delivery  |
+| Aarav     | Cashback Offer |
+| Priya     | 10% Off        |
+| Priya     | Free Delivery  |
+| Priya     | Cashback Offer |
+| Rahul     | 10% Off        |
+| Rahul     | Free Delivery  |
+| Rahul     | Cashback Offer |
+
+**Result:** All possible user-offer combinations are displayed. A real campaign could filter these combinations based on purchase history, eligibility, or user preferences.
+
+## Task 4: SELF JOIN — Employees and Managers
+
+**Objective:** To display each employee's name alongside their manager's name, and then identify employees who have no manager.
+
+### Query A: Display employees and their managers
+
+```sql
+SELECT
+    e.name AS employee_name,
+    m.name AS manager_name
+FROM employees e
+LEFT JOIN employees m
+    ON e.manager_id = m.id;
+```
+
+**Explanation:** The table is joined to itself. The alias `e` represents the employee, and `m` represents the manager. A `LEFT JOIN` includes employees whose manager is missing.
+
+### Query B: Display employees who have no manager
+
+```sql
+SELECT
+    name AS employee_name
+FROM employees
+WHERE manager_id IS NULL;
+```
+
+**Explanation:** The `IS NULL` condition selects employees whose `manager_id` is not assigned.
+
+**Result:** The first query displays employees and their managers. The second query displays only top-level employees who have no manager.
+
+## Task 5: AI-Assisted SQL — Find Users Living in the Same City
+
+**Objective:** To find pairs of different users who live in the same city using a `SELF JOIN`.
+
+### SQL Query
+
+```sql
+SELECT
+    u1.username AS user1,
+    u2.username AS user2,
+    u1.city
+FROM users u1
+JOIN users u2
+    ON u1.city = u2.city
+   AND u1.user_id < u2.user_id;
+```
+
+**Explanation:**
+
+- The `SELF JOIN` compares the `users` table with itself.
+- The condition `u1.city = u2.city` finds users living in the same city.
+- The condition `u1.user_id < u2.user_id` excludes matching a user with themselves and prevents each pair from appearing twice.
+- The query assumes the table contains `user_id`, `username`, and `city` columns.
+
+**Example result:**
+
+| user1 | user2 | city      |
+| ----- | ----- | --------- |
+| Aarav | Priya | Ahmedabad |
+| Rahul | Neha  | Surat     |
+
+*The result is illustrative sample data.*
+
+###
+
+## Conclusion
+
+In this assignment, I learned how to use advanced SQL joins. `FULL OUTER JOIN` combines matching and unmatched records from both tables, `SELF JOIN` compares records within the same table, and `CROSS JOIN` generates every possible combination of records. I also learned how AI tools can assist in writing, explaining, and improving SQL queries.
+
