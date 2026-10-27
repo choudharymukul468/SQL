@@ -1,0 +1,263 @@
+# ASSIGNMENT: SQL AND PYTHON DATA ANALYSIS USING PANDAS
+
+**Subject:** Database Management System (DBMS) / Data Analytics
+
+**Assignment Title:** Integrating SQL with Python and Jupyter Notebook
+
+**Student Name:** __________________________
+
+**Roll Number:** ____________________________
+
+**Class / Semester:** ________________________
+
+**College Name:** ___________________________
+
+**Date of Submission:** _____________________
+
+## 1. Load Restaurant Data Using `pandas.read_sql()`
+
+**Objective:** Load all records from a `restaurants` table in a local SQLite database into a pandas DataFrame and display the first five rows.
+
+**Python Code:**
+
+```python
+import sqlite3
+import pandas as pd
+
+# Connect to the SQLite database
+conn = sqlite3.connect("restaurants.db")
+
+# Load all records into a DataFrame
+df = pd.read_sql("SELECT * FROM restaurants", conn)
+
+# Display the first five rows
+print(df.head())
+
+conn.close()
+```
+
+**Explanation:**
+- `sqlite3.connect()` connects to the SQLite database.
+- `pd.read_sql()` executes the SQL query and loads the result into a DataFrame.
+- `df.head()` displays the first five rows.
+
+**Sample Output:**
+
+| name | cuisine | rating |
+|---|---|---:|
+| Spice Garden | Indian | 4.5 |
+| Dragon Palace | Chinese | 4.2 |
+| Pizza House | Italian | 4.1 |
+| South Spice | South Indian | 4.7 |
+| Burger Point | Fast Food | 3.9 |
+
+*The output is illustrative and assumes these records exist in the database.*
+
+## 2. Run SQL Queries in Jupyter Notebook Using `%sql`
+
+**Objective:** Use the `%sql` magic command to select movies with a rating above 8.
+
+**Step 1: Install the required packages**
+
+Run this command in a Jupyter Notebook cell:
+
+```python
+%pip install ipython-sql sqlalchemy
+```
+
+**Step 2: Load the SQL extension and connect to SQLite**
+
+```python
+%load_ext sql
+%sql sqlite:///movies.db
+```
+
+**Step 3: Execute the SQL query**
+
+```sql
+%%sql
+SELECT *
+FROM movies
+WHERE rating > 8;
+```
+
+**Explanation:**
+- `%load_ext sql` enables SQL magic commands.
+- `%sql sqlite:///movies.db` connects to the SQLite database file.
+- `%%sql` runs the entire cell as a SQL query.
+- `WHERE rating > 8` returns only movies rated above 8.
+
+**Sample Output:**
+
+| movie_id | title | rating |
+|---:|---|---:|
+| 101 | Movie A | 8.5 |
+| 102 | Movie B | 9.1 |
+| 103 | Movie C | 8.3 |
+
+*The output is illustrative. Your results depend on the actual `movies` table.*
+
+## 3. Find the Top 3 Most Ordered Food Items
+
+**Objective:** Load the last 100 orders from an `orders` table using `read_sql()` and identify the three most frequently ordered food items.
+
+**Assumption:** The table contains `order_id`, `order_date`, and `food_item` columns.
+
+**Python Code:**
+
+```python
+import sqlite3
+import pandas as pd
+
+conn = sqlite3.connect("orders.db")
+
+# Fetch the latest 100 orders
+query = """
+SELECT order_id, order_date, food_item
+FROM orders
+ORDER BY order_date DESC, order_id DESC
+LIMIT 100
+"""
+
+orders_df = pd.read_sql(query, conn)
+
+# Count the occurrences of each food item
+top_items = orders_df["food_item"].value_counts().head(3)
+
+print("Top 3 most ordered food items:")
+print(top_items)
+
+conn.close()
+```
+
+**Explanation:**
+1. SQL sorts the orders by date, newest first.
+2. `LIMIT 100` selects the latest 100 records.
+3. `value_counts()` counts how often each food item occurs.
+4. `head(3)` returns the three most frequent items.
+
+**Sample Output:**
+
+| Food item | Order count |
+|---|---:|
+| Pizza | 18 |
+| Burger | 15 |
+| Biryani | 12 |
+
+*These counts are illustrative; actual results depend on the database.*
+
+## 4. Create a Bar Chart of IPL Matches Played by Each Team
+
+**Objective:** Load IPL match data from a `matches` table into pandas and plot the number of appearances by each team.
+
+**Assumption:** Each match record has `team1` and `team2` columns.
+
+**Python Code:**
+
+```python
+import sqlite3
+import pandas as pd
+import matplotlib.pyplot as plt
+
+conn = sqlite3.connect("ipl.db")
+
+# Load match data
+matches_df = pd.read_sql(
+    "SELECT team1, team2 FROM matches",
+    conn
+)
+
+conn.close()
+
+# Count appearances in both team columns
+team_counts = pd.concat([
+    matches_df["team1"],
+    matches_df["team2"]
+]).dropna().value_counts()
+
+# Create the bar chart
+team_counts.sort_values(ascending=False).plot(
+    kind="bar",
+    figsize=(10, 6)
+)
+
+plt.title("IPL Matches Played by Each Team")
+plt.xlabel("Team")
+plt.ylabel("Number of Matches")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+```
+
+**Explanation:**
+- `pd.read_sql()` loads the match data into a DataFrame.
+- `pd.concat()` combines both team columns into a single series.
+- `value_counts()` counts how many matches each team played.
+- `plot(kind="bar")` creates the bar chart.
+
+**Expected Result:** A bar chart with team names along the horizontal axis and match appearances along the vertical axis.
+
+## 5. Fetch Users Who Have Placed More Than Five Orders
+
+**Objective:** Connect to SQLite, run an SQL query to identify users with more than five orders, and load the results into a pandas DataFrame.
+
+**Assumption:** The database contains an `orders` table with an `order_id` column and a `user_id` column.
+
+**Jupyter Notebook Code Cell:**
+
+```python
+import sqlite3
+import pandas as pd
+
+# Connect to the SQLite database
+conn = sqlite3.connect("orders.db")
+
+# Query users who have placed more than five orders
+query = """
+SELECT
+    user_id,
+    COUNT(order_id) AS total_orders
+FROM orders
+GROUP BY user_id
+HAVING COUNT(order_id) > 5
+ORDER BY total_orders DESC;
+"""
+
+# Load query results into a DataFrame
+users_df = pd.read_sql_query(query, conn)
+
+# Display the results
+display(users_df)
+
+conn.close()
+```
+
+**Explanation:**
+- `GROUP BY user_id` groups orders by each user.
+- `COUNT(order_id)` calculates the number of orders per user.
+- `HAVING COUNT(order_id) > 5` selects users with more than five orders.
+- `pd.read_sql_query()` loads the SQL results into a DataFrame.
+- `display(users_df)` shows the results in the notebook.
+
+**Sample Output:**
+
+| user_id | total_orders |
+|---:|---:|
+| 105 | 12 |
+| 108 | 9 |
+| 112 | 7 |
+
+*The output is illustrative and assumes the example users have the stated order counts.*
+
+## Conclusion
+
+This assignment demonstrates how to integrate SQL databases with Python for data analysis. Using pandas, SQLite, Jupyter Notebook, and matplotlib, we can retrieve records, filter data, find popular food items, visualize IPL statistics, and identify users based on their order activity.
+
+**Tools and Libraries Used:**
+- Python
+- SQLite
+- pandas
+- Jupyter Notebook
+- ipython-sql
+- SQLAlchemy
+- matplotlib
